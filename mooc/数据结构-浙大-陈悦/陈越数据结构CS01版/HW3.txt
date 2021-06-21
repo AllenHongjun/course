@@ -1,0 +1,90 @@
+p.92 #6
+Modify Program 2.11 so that it does not use a temporary string temp.
+Compare the complexity of your new function with that of the old one.
+
+Sketch of Program 2.11:
+  strcpy(temp,s,i); ---> O(i)
+  strcat(temp,t); ---> O(i+Lt)
+  strcat(temp,(s+i)); ---> O(i+Lt+Ls-i)
+  strcpy(s,temp); ---> O(Ls+Lt)
+Tp=O(2*(Ls+Lt)+Lt+2i), Sp=O(Ls+Lt).
+
+Version 1:
+  strcat(t,s+i); ---> O(Lt+Ls-i)
+  s[i]='\0'; 
+  strcat(s,t); ---> O(i+Lt+Ls-i)
+Tp=O(2*(Ls+Lt)-i), Sp=0.
+
+Version 2:
+  find strlen(s) and strlen(t) ---> O(Ls+Lt)
+  shift s[i]...[Ls-1] to s[Lt+i]...[Ls+Lt-1] ---> O(Ls-i)
+  insert t into s[i]...[Lt+i-1] ---> O(Lt)
+Tp=O(2*(Ls+Lt)-i), Sp=0.
+
+Version 3:
+  strcat(t,s+i); ---> O(Lt+Ls-i)
+  s[i]='\0';
+  strcpy(s+i,t); ---> O(Lt+Ls-i)
+Tp=O(2*(Ls+Lt-i)), Sp=0.
+-------------------------------------------------------
+
+p.91 #4  strpos1
+Input: string, character.  
+Output: integer = position of the 1st occurrence of "character" in
+                  "string".  -1 if not found.
+
+Note:
+Be aware of the efficiency of your program.
+Example:  for ( i = 0; i < strlen(string); i++ )  ... ;
+Then Tp=O(strlen^2).
+------------------------------------------------
+p.91 #9
+
+(a) j =  0  1  2  3  4
+         a  a  a  a  b
+    f = -1  0  1  2 -1
+
+(b) j =  0  1  2  3  4  5
+         a  b  a  b  a  a
+    f = -1 -1  0  1  2  0
+
+(c) j =  0  1  2  3  4  5  6  7
+         a  b  a  a  b  a  a  b
+    f = -1 -1  0  0  1  2  3  4
+--------------------------------------------------
+p.111 #1  For noncircular queue
+
+int queue_full ( int *front, int *rear )
+{   if (queue is indeed full)
+        print an error message, and return 0 (for full);
+    else
+        shift queue;
+        reset *front and *rear;
+        return 1 (for not full);
+}
+
+Note: Program 3.3 on p.108 must be modified accordingly.
+
+element queue_empty ( int *front, int *rear )
+{   element temp;
+    *front = *rear = -1; /* this is optional */
+    temp.key = ERROR;  /* ERROR is the global error signal */
+    print an error message;
+    return  temp;
+}
+
+Note:  Queue_full (or _empty) != Is_Full (or _Empty).
+-------------------------------------------------------
+p.111 #2  For circular queue
+
+void queue_full ( int *rear )
+{   print an error message;
+    (*rear)--;  /* Note: (*rear == 0) must be handled */
+}
+
+element queue_empty  
+  ----  similar to that of a noncircular queue, except that
+        *front and *rear may be reset to 0 instead of -1.
+
+Note:  For a circular queue, there is no need to check if it is indeed
+       full or empty.

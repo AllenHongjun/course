@@ -1,0 +1,209 @@
+#include <stdio.h>
+
+int main()
+{
+
+	const int MINOR = 35;
+
+	int age = 0;
+
+	printf("请输入你的年龄: ");
+	scanf("%d", &age);
+
+	printf("你的年龄是%d岁。\n", age);
+
+	if ( age < MINOR ) {
+    	printf("年轻是美好的，");
+	}
+
+	printf("年龄决定了你的精神世界，好好珍惜吧。\n");
+
+	return 0;
+}
+
+
+
+#include <stdio.h>
+
+int main()
+{
+	//	初始化
+	int price = 0;
+	int bill = 0;
+	//	读入金额和票面
+	printf("请输入金额：");
+	scanf("%d", &price);
+	printf("请输入票面：");
+	scanf("%d", &bill);
+	//	计算找零
+	printf("应该找您：%d\n", bill - price);
+
+	return 0;
+}
+
+#include <stdio.h>
+
+int main()
+{
+	//	初始化
+	int price = 0;
+	int bill = 0;
+	//	读入金额和票面
+	printf("请输入金额：");
+	scanf("%d", &price);
+	printf("请输入票面：");
+	scanf("%d", &bill);
+	//	计算找零
+	if ( bill >= price ) {
+		printf("应该找您：%d\n", bill - price);
+	}
+
+	return 0;
+}
+
+
+#include <stdio.h>
+
+int main()
+{
+	//	初始化
+	int price = 0;
+	int bill = 0;
+	//	读入金额和票面
+	printf("请输入金额：");
+	scanf("%d", &price);
+	printf("请输入票面：");
+	scanf("%d", &bill);
+	//	计算找零
+	if ( bill >= price ) {
+		printf("应该找您：%d\n", bill - price);
+	} else {
+		printf("你的钱不够\n");
+	}
+
+	return 0;
+}
+
+
+
+#include <stdio.h>
+
+int main()
+{
+	int hour1, minute1;
+	int hour2, minute2;
+
+	scanf("%d %d", &hour1, &minute1);
+	scanf("%d %d", &hour2, &minute2);
+
+	int ih = hour2 - hour1;
+	int im = minute2 - minute1;
+	if ( im <0 ) {
+		im = 60 + im;
+		ih --;
+	}
+	
+	printf("时间差是%d小时%d分。\n", ih, im);
+	
+	return 0;
+}
+
+
+#include <stdio.h>
+
+int main()
+{
+	int a,b;
+
+	printf("请输入两个整数：");
+	scanf("%d %d", &a, &b);
+	
+	int max = b;
+	if ( a > b ) {
+		max = a;
+	}
+
+	printf("大的那个是%d\n", max);
+
+	return 0;
+}
+
+//	max3.c
+#include <stdio.h>
+
+int main()
+{
+	int a,b,c;
+	scanf("%d %d %d", &a, &b, &c);
+
+	int max = 0;
+
+	if ( a>b ) {
+		if ( a>c ) {
+			max = a;
+		} else {
+			max = c;
+		}
+	} else {
+		if ( b>c ) {
+			max = b;
+		} else {
+			max = c;
+		}
+	}
+
+	printf("The max is %d\n", max);
+
+	return 0;
+}
+
+
+
+#include <stdio.h>
+
+int main()
+{
+	const double RATE = 8.25;  
+	const int STANDARD = 40;   
+	double pay = 0.0;
+	int hours;
+
+	printf("请输入工作的小时数: ");
+	scanf("%d", &hours);
+	printf("\n");
+	if (hours > STANDARD)
+   		pay = STANDARD * RATE + 
+   			(hours-STANDARD) * (RATE * 1.5);
+	else
+   		pay = hours * RATE;
+	printf("应付工资: %f\n", pay);
+
+	return 0;
+}
+
+
+#include <stdio.h>
+
+int main()
+{
+	const int PASS=60;
+	int score;
+
+	printf("请输入成绩: ");
+	scanf("%d", &score);
+	
+	printf("你输入的成绩是%d.\n", score);
+	if ( score < PASS )
+		printf("很遗憾，这个成绩没有及格。");
+	else {
+		printf("祝贺你，这个成绩及格了。");
+		printf("再见\n");
+	}
+
+	return 0;
+}
+
+
+
+
+

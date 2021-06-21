@@ -1,0 +1,64 @@
+p.13 #5  
+Pigeon Hole Principle: If f has n distinct inputs but 
+less than n distinct outputs, then there are two inputs 
+a != b such that f(a)=f(b).
+Write a C program to find the values a and b for which the
+range values are equal.
+
+Note:
+1. Your program should work for any f with any set of inputs.
+2. if (f(x[i])==f(x[j]) && x[i]!=x[j])
+3. You can't claim that the principle is not valid simply
+   because there is no f(a)==f(b), since f could be a 1-1 mapping.
+   That is, with n distinct inputs f has n distinct outputs.
+Sample input:
+   n = 6
+   -2 -2 -1 0 1 2
+Sample output (with f(x)=x*x):
+   There are 5 distinct inputs and 3 distinct outputs.
+   f(-2) = f(2)
+   f(-1) = f(1)
+--------------------
+
+p.13 #9
+Write an iterative function to compute a binomial coefficient, 
+then transform it into an equivalent recursive function.
+
+Note:
+1. For iterative version: it's okay to compute n!, m!, and (n-m)!
+   separately and then calculate the final result.  But it's too
+   slow and is not acceptable for a professional programmer.  
+   Remember: always try to simplify your function before computing.
+2. bc *= (n-i)/(i+1) -- the problem is that integer division will
+   introduce round-off error.  Try to compute C(6,2) and you'll see.
+3. For recursive version: you are supposed to transform the function
+   to compute binomial(n,m), not only to compute n!.  The advantage
+   of recursion is that there is no multiplication involved.
+4. Error handling must be considered (m>n).
+--------------------
+
+p.17 #2
+Create an ADT, Set.  Use the standard mathematics definition 
+and include the following operations: Create, Insert, Remove, 
+Is_In, Union, Intersection, Difference.
+
+Note:
+1. ADT != implimentation.  Set != string, array, linked list ...
+2. Mathematical definition of "set": a collection of objects (could 
+   be int, float, struct, class ...) which are either enumerated or 
+   are determined by the possession of some common property.
+
+   ADT definition: a finite list of zero or more elements.  
+Sample functions:
+   For any s, s1, s2 in Set; TRUE, FALSE in Boolean; x in Element
+Set Create()::= return a set with zero element
+Set Insert(x,s)::= if (x is not in s) return s with x being inserted
+                   else return error
+Set Remove(x,s)::= if (x is in s) return s with x being removed
+                   else return error
+Boolean Is_In(x,s)::= if (x is in s) return TRUE
+                      else return FALSE
+Set Union(s1,s2)::= return a set with all elements in s1 or s2
+Set Intersection(s1,s2)::= return a set with all elements in s1 and s2
+Set Difference(s1,s2)::= return a set with elements in s1 but 
+                         not in s2

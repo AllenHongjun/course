@@ -1,0 +1,166 @@
+p.21 #3
+Determine the space complexity of the iterative and recursive binomial 
+coefficient functions created in Exercise 9, Section 1.2.
+
+For iterative program: Sp=0, S(P)=O(1)
+
+For recursive program: Sp=O(n)
+                                (n,m)
+                         (n-1,m)    (n-1,m-1)
+                    .....                ......
+             ......                        (n-m,0)
+          ......                     ......
+      (m+1,m)                  ......
+   (m,m)  (m,m-1)       .......
+    (m-1,m-1) ...    ......
+                ......
+         (1,1) (1,0)
+
+   maximum number of recursive calls on stack = (n-m)+(m-1) = n-1
+------------------
+
+p.37 #5
+Determine the worst case complexity of Program 1.18.
+
+  Tp=O(rows*cols)  The worst case: rows = cols = MAX_SIZE.
+------------------
+
+p.66 #2  
+Write a function, pmult, that multiplies two polynomials.  Figure out
+the computing time of your function.
+
+Version 1:
+  p(x)::= degree n + coefficients p[0]...[n]
+  D(x)=A(x)*B(x)=sum of {a[i]*b[j]*x^(i+j)}
+  Tp=O(degree(A)*degree(B))
+  Works fine if the polynomials are not sparse.
+
+Version 2:
+  p(x)::= non-zero-term[n]
+  D(x)=sum of {A[i].coef*B[j].coef*x^(A[i].expon+B[i].expon)} 
+  ---> Tp=O(m*n) where m & n are numbers of non-zero terms in A(x)
+       and B(x), respectively.
+  Note: The terms in D(x) must be sorted and the final result must
+        be moved to the position right next to A & B.
+        For example: 
+        (x^1000+x^20)*(x^990+2) = x^1990 + 2x^1000 + x^1010 + 2x^20
+        The final result in term[] must be:
+         coef: 1     1    1    2   1     1     2     2
+        expon: 1000  20   990  0   1990  1010  1000  20
+  T_selection-sort = O((m*n)^2); T_move = O(m*n).  Therefore Tp=O((m*n)^2).
+
+Version 3:
+  p(x)::= non-zero-term[n]
+  D(x)=sum of {A[i].coef*x^(A[i].expon)*B(x)}
+  Algorithm:
+    D(x)=SingleMult(B,A[0].coef,A[0].expon) ---> T=O(n)
+    for (i=1; i<=m; i++)
+    {  temp1=SingleMult(B,A[i].coef,A[i].expon) ---> T=O(n)
+       temp2=Padd(D,temp1) ---> T=O(i*n+n)
+       Move(temp2,D) ---> T=O(n*(i+1))
+    }
+  Worst case Tp=O(n*m^2).
+            A       B         D       temp1          temp2
+    i=1  |  m  |    n    |    n    |    n    |        2n         | ...
+         ------------------------------------------------------------------------------
+            A       B              D            temp1               temp2
+    i=2  |  m  |    n    |        2n         |    n    |             3n              | ...
+         ---------------------------------------------------------------------------------
+    ...
+===================================================================
+
+p.66 #3
+Write a function, peval,that evaluates a polynomial at some value, x0.
+Try to minimize the number of operations.
+
+Version 1:
+  p(x)=a[0]+a[1]*x+...+a[n]*x^n 
+   ---> n(n+1)/2 multiplications & n additions
+
+Version 2:
+  p(x)=a[0]+x(a[1]+x(...(a[n-1]+x*a[n])...)
+   ---> n multiplications & n additions
+
+Version 3:
+  p(x)= a[0]*x^e[0] + a[1]*x^e[1] + ... + a[n]*x^e[n]
+      = x^e[0] {a[0]+x^(e[1]-e[0]) {...{a[n-1]+x^(e[n]-e[n-1])*a[n]}...}
+   ---> e[n] (>=n) multiplications + n additions + (n-1) subtractions
+
+Version 4: credit to Áõ¼Òâý
+      Transform exponents into binary numbers:
+  e = b[k]*2^k + ... + b[1]*2 + b[0] where b[i]=0 or 1.
+  Then x^e = x^(b[k]*2^k) * ... * x^(b[1]*2) * x^b[0].
+      Save x, x^2, x^4, x^8, ..., x^(2^MAX) into a power_list[] 
+  where MAX <= ln(e)/ln(2). ---> MAX multiplications
+      Then computing x^e requires at most ln(e)/ln(2) multiplications.
+  Using the formula in Version 3, the total number of multiplications is
+  at most ln(e)/ln(2) + n + sum of {ln(e[i+1]-e[i])/ln(2)}.  Hence the
+  worst case Tp=O(n+ln(e)^2).
+===================================================================
+
+p.77 #1
+Write C functions read_matrix, print_matrix, and search that read triples 
+into a new sparse matrix, print out the terms in a sparse matrix, and 
+search for a value in a sparse matrix.  Analyze the computing time of 
+each of these functions.
+
+(1) read_matrix ::= read triples into a new sparse matrix.
+Note: You are supposed to store the triples in proper ORDER.
+Sample input: 
+100 100
+30  5   25
+0   18  2
+77  34  99
+0   5   23
+Sample result:
+a[0].row=100, a[0].col=100, a[0].value=4;
+a[1].row=0,   a[1].col=5,   a[1].value=23;
+a[2].row=0,   a[2].col=18,  a[2].value=2;
+a[3].row=30,  a[3].col=5,   a[3].value=25;
+a[4].row=77,  a[4].col=34,  a[4].value=99.
+
+(2) print_matrix ::= print out the terms in a sparse matrix.
+Note: You are supposed to print the MATRIX, not the triples.
+Sample output:
+1 0 0 0 5 0
+0 0 2 0 0 0
+0 0 0 0 0 0
+0 3 0 0 0 0
+0 0 0 0 0 4
+
+(3) search ::= search for a value in a sparse matrix.
+Note: Search != Is_In; and all the entries with (value == searchnum)
+      must be found.
+===================================================================
+p.78 #6
+As an alternate sparse matrix representation we keep only the nonzero 
+terms in a one-dimensional array, value, in the order described in 
+the text.  In addition, we also maintain a two-dimensional array, 
+bits[rows][columns], such that bits[i][j]=0 if a[i][j]=0 and 
+bits[i][j]=1 if a[i][j]!=0.
+
+(a) If each entry of bits[][] and value[] occupies one word, then 
+the total bits taken = (row*col+t)*w.
+    If bits[][] is an integer matrix and value[] is measured by words,
+then the total bits taken = 16*row*col+t*w.
+    If each entry of bits[][] occupies one bit only and value[] is 
+measured by words, then the total bits taken = row*col+t*w.
+
+(b) D=A+B ---> Tp=O(row*col)
+Note: D_bits[i][j]=1 iff A[i][j]+B[i][j]!=0.
+
+(c)  Terms  |     Method in Text          |          Method in Exercise
+   ---------------------------------------------------------------------------------
+   1. Space |           3t                |          row*col + t
+   ---------------------------------------------------------------------------------
+   2. Random| worst case Tp=O(t) if the   |If we keep another array ra[] such that
+      Access| entry is zero               |ra[i]=# of nonzero terms in rows 0 through 
+            |                             |i-1, then the worst case Tp=O(col).
+   ---------------------------------------------------------------------------------
+   3. Add   |       Tp=O(ta+tb)           |           Tp=O(row*col)
+   ---------------------------------------------------------------------------------
+   4. Mult  | Tp=O(col_b*ta+row_a*tb)     |        Tp=O(row_a*col_a*col_b)
+   ---------------------------------------------------------------------------------
+   5. Trans | Tp=O(t+col) with 2*col      | Tp=O(row*col+t) with 2*col additional
+            | additional spaces           | spaces
+   ---------------------------------------------------------------------------------

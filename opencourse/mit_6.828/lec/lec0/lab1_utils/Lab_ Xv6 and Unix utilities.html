@@ -1,0 +1,504 @@
+
+<!-- saved from url=(0052)https://pdos.csail.mit.edu/6.828/2020/labs/util.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Lab: Xv6 and Unix utilities</title>
+<link rel="stylesheet" href="./Lab_ Xv6 and Unix utilities_files/labs.css" type="text/css">
+<script src="./Lab_ Xv6 and Unix utilities_files/guidance.js.&#19979;&#36733;"></script>
+</head>
+
+<body>
+
+<h1>Lab: Xv6 and Unix utilities</h1>
+
+<p>This lab makes you familiar with xv6 and its system calls.
+
+</p><div class="prereq">
+<p>Before you start coding, read Chapter 1 of
+    the <a href="https://pdos.csail.mit.edu/6.828/2020/xv6/book-riscv-rev1.pdf">xv6 book</a>, and few of
+    the existing utilities
+    (e.g., <tt>user/echo.c</tt>, <tt>user/grep.c</tt>,
+    and <tt>user/rm.c</tt>)
+</p></div>
+
+<h2>Boot xv6 <script>g("easy")</script>(<a class="easy" href="https://pdos.csail.mit.edu/6.828/2020/labs/guidance.html">easy</a>)</h2>
+
+<p>You must use an x86 Athena machine; that is, <tt>uname -a</tt>
+should mention <tt>i386 GNU/Linux</tt> or <tt>i686 GNU/Linux</tt> or
+<tt>x86_64 GNU/Linux</tt>.
+You can log into a public Athena host with <tt>ssh -X athena.dialup.mit.edu</tt>.
+</p>
+
+<p>We have set up the appropriate compilers and simulators for you on
+Athena.  To use them, run <kbd>add -f 6.828</kbd>.  You must run this
+command every time you log in (or add it to your
+<tt>~/.environment</tt> file).  If you get obscure errors while
+compiling or running <tt>qemu</tt>, double check that you added the
+course locker.</p>
+
+<p>Fetch the xv6 source for the lab and check out the <tt>util</tt> branch:
+</p><pre>$ <kbd> git clone git://g.csail.mit.edu/xv6-labs-2020</kbd>
+Cloning into 'xv6-labs-2020'...
+...
+$ <kbd>cd cd xv6-labs-2020</kbd>
+$ <kbd>git checkout util</kbd>
+Branch 'util' set up to track remote branch 'util' from 'origin'.
+Switched to a new branch 'util'
+</pre>
+
+<p>The xv6-labs-2020 repository differs slightly from the book's
+  xv6-riscv; it mostly adds some files. If you are curious look
+  at the git log:
+</p><pre>$ <kbd>git log</kbd>
+</pre>
+
+<p>The files you will need for this and subsequent lab assignments in
+this course are distributed using
+the <a href="http://www.git-scm.com/">Git</a> version control system.
+Above you created a new branch (<kbd>git branch util</kbd>) for your
+solutions for the utilities lab.  To learn more about Git, take a look at the
+<a href="http://www.kernel.org/pub/software/scm/git/docs/user-manual.html">Git
+user's manual</a>, or, you may find this
+<a href="http://eagain.net/articles/git-for-computer-scientists/">CS-oriented
+overview of Git</a> useful.
+Git allows you to keep track of the changes you make to the code.
+For example, if you are finished with one of the exercises, and want
+to checkpoint your progress, you can <i>commit</i> your changes
+by running:
+</p>
+<pre>$ <kbd>git commit -am 'my solution for util lab exercise 1'</kbd>
+Created commit 60d2135: my solution for util lab exercise 1
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+$
+</pre>
+
+<p>
+You can keep track of your changes by using the <kbd>git diff</kbd>
+command.  Running <kbd>git diff</kbd> will display the changes to your
+code since your last commit, and <kbd>git diff
+origin/xv6-labs-2020</kbd> will display the changes relative to the
+initial xv6-labs-2020 code.  Here, <tt>origin/xv6-labs-2020</tt> is the
+name of the git branch with the initial code you downloaded for the
+class.
+</p>
+
+<p>Build xv6 on Athena (<font color="red">XXX</font> update):
+</p><pre>$ <kbd>make</kbd>
+riscv64-linux-gnu-gcc    -c -o kernel/entry.o kernel/entry.S
+riscv64-linux-gnu-gcc -Wall -Werror -O -fno-omit-frame-pointer -ggdb -MD -mcmodel=medany -ffreestanding -fno-common -nostdlib -mno-relax -I. -fno-stack-protector -fno-pie -no-pie   -c -o kernel/start.o kernel/start.c
+...
+$ <kbd>make qemu</kbd>
+...
+mkfs/mkfs fs.img README user/_cat user/_echo user/_forktest user/_grep user/_init user/_kill user/_ln user/_ls user/_mkdir user/_rm user/_sh user/_stressfs user/_usertests user/_wc user/_zombie user/_cow 
+nmeta 46 (boot, super, log blocks 30 inode blocks 13, bitmap blocks 1) blocks 954 total 1000
+balloc: first 497 blocks have been allocated
+balloc: write bitmap block at sector 45
+qemu-system-riscv64 -machine virt -kernel kernel/kernel -m 3G -smp 3 -nographic -drive file=fs.img,if=none,format=raw,id=x0 -device virtio-blk-device,drive=x0,bus=virtio-mmio-bus.0
+hart 0 starting
+hart 2 starting
+hart 1 starting
+init: starting sh
+$
+</pre>
+
+<p>
+If you type <tt>ls</tt> at the prompt, you should see output similar
+to the following (<font color="red">XXX</font> update):
+</p><pre>$ <kbd>ls</kbd>
+.              1 1 1024
+..             1 1 1024
+README         2 2 2181
+cat            2 3 21024
+echo           2 4 19776
+forktest       2 5 11456
+grep           2 6 24512
+init           2 7 20656
+kill           2 8 19856
+ln             2 9 19832
+ls             2 10 23280
+mkdir          2 11 19952
+rm             2 12 19936
+sh             2 13 38632
+stressfs       2 14 20912
+usertests      2 15 106264
+wc             2 16 22160
+zombie         2 17 19376
+cow            2 18 27152
+console        3 19 0
+</pre>
+These are the programs/files that <tt>mkfs</tt> includes in the
+initial file system.  You just ran one of them: <tt>ls</tt>.
+
+<p>xv6 has no <tt>ps</tt> command, but, if you type <kbd>Ctrl-p<kbd>,
+the kernel will print information about each process.
+      
+</kbd></kbd></p><p>To quick qemu type: <kbd>Ctrl-a x<kbd>.
+
+</kbd></kbd></p><p>If you are working on a non-Athena machine, you'll need to install
+<tt>qemu</tt> and <tt>gcc</tt> for RISC-V following the directions on
+the <a href="https://pdos.csail.mit.edu/6.828/2020/tools.html">tools page</a>.
+</p>
+
+
+<h2>Hand-in procedure</h2>
+
+<p>
+You will turn in your assignments using the <a href="https://6828.scripts.mit.edu/2020/handin.py/">submission website</a>.
+You need to request an API key from the submission website before you can turn
+in any assignments or labs.
+</p>
+
+<p>
+The lab code comes with GNU Make rules to make submission easier. After
+committing your final changes to the lab, type <kbd>make handin</kbd> to submit
+your lab.
+</p><pre>$ <kbd>git commit -am "ready to submit my lab"</kbd>
+[util c2e3c8b] ready to submit my lab
+ 2 files changed, 18 insertions(+), 2 deletions(-)
+
+ (<font color="red">XXX</font> update output):
+$ <kbd>make handin</kbd>
+git archive --prefix=util/ --format=tar HEAD | gzip &gt; util-handin.tar.gz
+Get an API key for yourself by visiting https://6828.scripts.mit.edu/2020/handin.py/
+Please enter your API key: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100 50199  100   241  100 49958    414  85824 --:--:-- --:--:-- --:--:-- 85986
+$
+</pre>
+<kbd>make handin</kbd> will store your API key in <i>myapi.key</i>. If you need
+to change your API key, just remove this file and let <kbd>make handin</kbd>
+generate it again (<i>myapi.key</i> must not include newline characters).
+<p></p>
+
+<p>
+If use <kbd>make handin</kbd> and you have either uncomitted changes or
+untracked files, you will see output similar to the following:
+</p><pre> M hello.c
+?? bar.c
+?? foo.pyc
+Untracked files will not be handed in.  Continue? [y/N]
+</pre>
+Inspect the above lines and make sure all files that your lab solution needs
+are tracked i.e. not listed in a line that begins with <kbd>??</kbd>.
+You can cause <tt>git</tt> to track a new file that you create using
+<tt>git add filename</tt>.
+<p></p>
+
+<p>
+In the case that <kbd>make handin</kbd> does not work properly, 
+try fixing the problem with the curl or Git commands.
+Or you can run <kbd>make tarball</kbd>.
+This will make a tar file for you, which you can
+then upload via our 
+<a href="https://6828.scripts.mit.edu/2020/handin.py/">web interface</a>.
+</p>
+
+<p>
+You can run <kbd>make grade</kbd>
+to test your solutions with the grading program. The TAs will use the same
+grading program to assign your lab submission a grade.
+</p>
+
+<h2>sleep <script>g("easy")</script>(<a class="easy" href="https://pdos.csail.mit.edu/6.828/2020/labs/guidance.html">easy</a>)</h2>
+
+<div class="required">
+<p>Implement the UNIX program sleep for xv6; your sleep should pause
+  for a user-specified number of ticks.  (A tick is a notion of time
+  defined by the xv6 kernel, namely the time between two interrupts
+  from the timer chip.)  Your solution should be in the file
+  <tt>user/sleep.c</tt>.
+</p></div>
+
+<p>
+
+</p><p>Some hints:
+  </p><ul>
+    <li>Look at some of the other programs in <tt>user/</tt> to see
+    how you can obtain the command-line arguments passed to a program.  If the user
+    forgets to pass an argument, sleep should print an error message.
+
+    </li><li>The command-line argument is passed as a string; you can convert it to an
+      integer using <tt>atoi</tt> (see user/ulib.c).
+
+    </li><li>Use the system call <tt>sleep</tt> (see user/usys.S and kernel/sysproc.c).
+
+    </li><li>Make sure <tt>main</tt> calls <tt>exit()</tt> in order to exit
+    your program.
+
+    </li><li>Add the program to <tt>UPROGS</tt> in Makefile and compile
+      user programs by typing <tt>make fs.img</tt>.
+
+    </li><li>Look at Kernighan and Ritchie's book <i>The C programming language
+        (second edition)</i> (K&amp;R) to learn about C.
+
+  </li></ul>
+
+  <p>Run the program from the xv6 shell:
+    </p><pre>      $ <kbd>make qemu</kbd>
+      ...
+      init: starting sh
+      $ <kbd>sleep 10</kbd>
+      (nothing happens for a little while)
+      $
+    </pre>
+  <p>Your solution is correct, if your program behaves as shown
+  above.  Run <kbd>make grade</kbd> to see if you indeed pass the
+  sleep test.
+   
+
+</p><h2>pingpong <script>g("easy")</script>(<a class="easy" href="https://pdos.csail.mit.edu/6.828/2020/labs/guidance.html">easy</a>)</h2>
+
+<div class="required">
+<p> Write a program that uses UNIX system calls to ``ping-pong'' a
+  byte between two processes over a pair of pipes, one for each
+  direction. The parent sends by writing a byte to <tt>parent_fd[1]</tt> and
+  the child receives it by reading from <tt>parent_fd[0]</tt>. After
+  receiving a byte from parent, the child responds with its own byte
+  by writing to <tt>child_fd[1]</tt>, which the parent then reads.  Your
+  solution should be in the file <tt>user/pingpong.c</tt>.
+</p></div>
+
+<p>Some hints:
+  </p><ul>
+    <li>Use <tt>pipe</tt> to create a pipe.
+    </li><li>Use <tt>fork</tt> to create a child.
+    </li><li>Use <tt>read</tt> to read from the pipe, and <tt>write</tt> to write to the pipe.
+    </li><li>Add the program to <tt>UPROGS</tt> in Makefile and compile
+      user programs by typing <tt>make fs.img</tt>.
+  </li></ul>
+
+  <p>Run the program from the xv6 shell and it should produce the
+  following output:
+  </p><pre>    $ <kbd>make qemu</kbd>
+    ...
+    init: starting sh
+    $ <kbd>pingpong</kbd>
+    4: received ping
+    3: received pong
+    $
+  </pre>
+    <p>Your solution is correct, if your program behaves as shown above.
+  The number before ":" is the process id of the process printing the
+  output.  You can get the process id by calling the system call <tt>getpid</tt>.
+
+  
+</p><h2>primes <script>g("moderate")</script>(<a class="moderate" href="https://pdos.csail.mit.edu/6.828/2020/labs/guidance.html">moderate</a>)</h2>
+
+<div class="required">
+  <p>Write a concurrent version of prime sieve using pipes.  This idea
+    is due to Doug McIlroy, inventor of Unix pipes.  The picture
+    halfway down <a href="http://swtch.com/~rsc/thread/">this page</a>
+    and the surrounding text explain how to do it.  Your
+    solution should be in the file <tt>user/primes.c</tt>.
+</p></div>
+
+    <p>Your goal is to use <tt>pipe</tt> and <tt>fork</tt> to set up
+    the pipeline. The first process feeds the numbers 2 through 35
+    into the pipeline.  For each prime number, you will arrange to
+    create one process that reads from its left neighbor over a pipe
+    and writes to its right neighbor over another pipe. Since xv6 has
+    limited number of file descriptors and processes, the first
+    process can stop at 35.
+    
+</p><p>Some hints:
+  </p><ul>
+    <li>Be careful to close file descriptors that a process doesn't
+    need, because otherwise your program will run xv6 out of resources
+    before the first process reaches 35.
+      
+    </li><li>Once the first process reaches 35, you should arrange that the
+    pipeline terminates cleanly, including all children (Hint: read will return an end-of-file
+      when the write-side of the pipe is closed).
+
+    </li><li>It's simplest to directly write 32-bit <tt>int</tt>s to the
+        pipes, rather than using formatted ASCII I/O.
+
+    </li><li>You should create the processes in the pipeline as they are
+      needed.
+
+    </li><li>Add the program to <tt>UPROGS</tt> in Makefile and compile
+      user programs by typing <tt>make fs.img</tt>.
+
+  </li></ul>
+
+<p>Your solution is correct if it produces the following output:
+  </p><pre>    $ <kbd>make qemu</kbd>
+    ...
+    init: starting sh
+    $ <kbd>primes</kbd>
+    prime 2
+    prime 3
+    prime 5
+    prime 7
+    prime 11
+    prime 13
+    prime 17
+    prime 19
+    prime 23
+    prime 29
+    prime 31
+    $
+  </pre>
+  
+<h2>find <script>g("moderate")</script>(<a class="moderate" href="https://pdos.csail.mit.edu/6.828/2020/labs/guidance.html">moderate</a>)</h2>
+
+<div class="required">
+<p>Write a simple version of the UNIX find program: find all the files
+  in a directory tree whose name matches a string.  Your solution
+  should be in the file <tt>user/find.c</tt>.
+  
+</p></div>
+  
+<p>Some hints:
+  </p><ul>
+    <li>Look at user/ls.c to see how to read directories.
+    </li><li>Use recursion to allow find to descend into sub-directories.
+    </li><li>Don't recurse into "." and "..".
+    </li><li>Changes to the file system persist across runs of qemu; to get
+    a clean file system run <kbd>make clean</kbd> and then <kbd>make qemu</kbd>.
+    </li><li>You'll need to use C strings. Have a look at K&amp;R (the C book),
+      for example Section 5.5.
+    </li><li>Add the program to <tt>UPROGS</tt> in Makefile and compile
+      user programs by typing <tt>make fs.img</tt>.
+  </li></ul>
+
+<p>Your solution is correct if produces the following output (when the
+  file system contains a file <tt>a/b</tt>):
+  </p><pre>    $ <kbd>make qemu</kbd>
+    ...
+    init: starting sh
+    $ <kbd>mkdir a</kbd>
+    $ <kbd>echo &gt; a/b</kbd>
+    $ <kbd>find . b</kbd>
+    ./a/b
+    $ 
+  </pre>
+
+<h2>xargs <script>g("moderate")</script>(<a class="moderate" href="https://pdos.csail.mit.edu/6.828/2020/labs/guidance.html">moderate</a>)</h2>
+
+<div class="required">
+<p>Write a simple version of the UNIX xargs program: read lines from
+  standard input and run a command for each line, supplying the line as
+  arguments to the command.   Your solution
+  should be in the file <tt>user/xargs.c</tt>.
+</p></div>
+
+  The following example illustrates xarg's
+  behavior:
+  <pre>    $ <kbd>xargs echo bye</kbd>
+    hello too
+    bye hello too
+    <kbd>ctrl-d</kbd>
+    $
+  </pre>
+  Note that the command here is "echo bye" and the additional
+  arguments are "hello too", making the command "echo bye hello too",
+  which outputs "bye hello too".
+  
+<p>Some hints:
+  </p><ul>
+    <li>Use <tt>fork</tt> and <tt>exec</tt> system call to invoke the
+      command on each line of input.  Use <tt>wait</tt> in the parent
+      to wait for the child to complete running the command.
+    </li><li>Read from stdin a character at the time until the newline
+      character ('\n').
+    </li><li>kernel/param.h declares MAXARG, which may be useful if you need
+      to declare an argv.
+    </li><li>Add the program to <tt>UPROGS</tt> in Makefile and compile
+      user programs by typing <tt>make fs.img</tt>.
+    </li><li>Changes to the file system persist across runs of qemu; to get
+    a clean file system run <kdb>make clean</kdb> and then <kdb>make qemu</kdb>.
+  </li></ul>
+
+<p>xargs, find, and grep combine well:
+  </p><pre>  $ <kbd>find . b | xargs grep hello</kbd>
+  </pre>
+  will run "grep hello" on each file named b in the directories below
+  ".".
+
+<p>To test your solution for xargs, run the shell script xargstest.sh.
+Your solution is correct if it produces the following output:
+  </p><pre>  $ <kbd>make qemu</kbd>
+  ...
+  init: starting sh
+  $ <kbd>sh &lt; xargstest.sh</kbd>
+  $ $ $ $ $ $ hello
+  hello
+  hello
+  $ $   
+  </pre>
+You may have to fix bugs in your find program.  The output has
+many <tt>$</tt> because the xv6 shell is primitive and doesn't realize
+it is processing commands from a file instead of from the console, and
+prints a <tt>$</tt> for each command in the file.
+
+<h2>Submit the lab</h2>
+
+<p><b>This completes the lab.</b> Make sure you pass all of the make
+grade tests. If this lab had questions, don't forget to write up your
+answers to the questions in answers-<i>lab-name</i>.txt. Commit your changes
+(including adding answers-<i>lab-name</i>.txt) and type make handin in the lab
+directory to hand in your lab.
+
+</p><h3>Time spent</h3>
+
+<p>Create a new file, <tt>time.txt</tt>, and put in it a single integer, the
+number of hours you spent on the lab. Don't forget to <tt>git add</tt> and
+<tt>git commit</tt> the file.
+
+</p><h3>Submit</h3>
+
+<p>
+</p><div class="warning">
+<ul>
+  <li>Please run `make grade` to ensure that your code passes all of the tests</li>
+  <li>Commit any modified source code before running `make handin`</li>
+  <li>You can inspect the status of your submission and download the submitted code at <a href="https://6828.scripts.mit.edu/2019/handin.py/">https://6828.scripts.mit.edu/2019/handin.py/</a> </li>
+</ul>
+</div>
+
+
+
+  
+<h2>Optional challenge exercises</h2>
+
+<ul>
+    
+  <li><p>Write an uptime program that prints the uptime in terms of
+      ticks using the <tt>uptime</tt> system call. <script>g("easy")</script>(<a class="easy" href="https://pdos.csail.mit.edu/6.828/2020/labs/guidance.html">easy</a>)
+      </p></li>
+
+  <li><p>Support regular expressions in name matching
+  for <tt>find</tt>.  <tt>grep.c</tt> has some primitive support for
+  regular expressions.  <script>g("easy")</script>(<a class="easy" href="https://pdos.csail.mit.edu/6.828/2020/labs/guidance.html">easy</a>)
+      </p></li>
+
+  <li><p>The xv6 shell (<tt>user/sh.c</tt>) is just another user
+      program and you can improve it. It is a minimal shell and lacks
+      many features found in real shell. For example, modify the shell
+      to not print a <tt>$</tt> when processing shell commands from a
+      file <script>g("moderate")</script>(<a class="moderate" href="https://pdos.csail.mit.edu/6.828/2020/labs/guidance.html">moderate</a>), modify the shell to
+      support wait <script>g("easy")</script>(<a class="easy" href="https://pdos.csail.mit.edu/6.828/2020/labs/guidance.html">easy</a>), modify the shell to
+      support lists of commands, separated by ";"
+      <script>g("moderate")</script>(<a class="moderate" href="https://pdos.csail.mit.edu/6.828/2020/labs/guidance.html">moderate</a>), modify the shell to support
+      sub-shells by implementing "(" and ")"
+      <script>g("moderate")</script>(<a class="moderate" href="https://pdos.csail.mit.edu/6.828/2020/labs/guidance.html">moderate</a>), modify the shell to support
+      tab completion <script>g("easy")</script>(<a class="easy" href="https://pdos.csail.mit.edu/6.828/2020/labs/guidance.html">easy</a>), modify the shell to
+      keep a history of passed shell commands
+      <script>g("moderate")</script>(<a class="moderate" href="https://pdos.csail.mit.edu/6.828/2020/labs/guidance.html">moderate</a>), or anything else you would
+      like your shell to do. (If you are very ambitious, you may have
+      to modify the kernel to support the kernel features you need;
+      xv6 doesn't support much.)
+
+</p></li></ul>
+
+
+
+
+
+<div class="xl-chrome-ext-bar" id="xl_chrome_ext_{4DB361DE-01F7-4376-B494-639E489D19ED}" style="display: none;">
+      <div class="xl-chrome-ext-bar__logo"></div>
+
+      <a id="xl_chrome_ext_download" href="javascript:;" class="xl-chrome-ext-bar__option">&#19979;&#36733;&#35270;&#39057;</a>
+      <a id="xl_chrome_ext_close" href="javascript:;" class="xl-chrome-ext-bar__close"></a>
+    </div></body></html>

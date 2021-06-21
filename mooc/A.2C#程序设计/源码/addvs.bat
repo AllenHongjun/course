@@ -1,0 +1,1 @@
+set path=C:\Program Files\Microsoft Visual Studio .NET\FrameworkSDK\Bin;C:\WINNT\Microsoft.NET\Framework\v1.0.3705;%path%

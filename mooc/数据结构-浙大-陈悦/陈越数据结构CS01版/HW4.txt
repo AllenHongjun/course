@@ -1,0 +1,114 @@
+p.125 #1
+    Infix                          Postfix
+(a) a*b*c                          ab*c*
+(b) -a+b-c+d                       a"-"b+c-d+  
+                                   ("-" is "uminus" in a compiler)
+(c) a*-b+c                         ab"-"*c+
+(d) (a+b)*d+e/(f+a*d)+c            ab+d*efad*+/+c+
+(e) a&&b||c||!(e>f)                ab&&c||ef>!||
+(f) !(a&&!((b<c)||(c>d)))||(c<e)   abc<cd>||!&&!ce<||
+
+Note: The order of operands must NOT be changed.
+----------------------------------------------------------
+p.127 #2  void print_token ( precedence token )
+          ---- similar to get_token (Program 3.10 on p.123).
+
+Note: 
+1. Precedence != ASCII code, so you may not simply print (char)token.  
+   For example, precedence plus == 2, yet (char)plus == STX.
+2. Must handle default.
+----------------------------------------------------------
+p.131 #1  
+Represent 2 stacks in memory[MEMORY_SIZE].  Elements can be pushed
+on to stack as long as the total number of elements in both stacks
+< MEMORY_SIZE - 1.
+
+Note: 
+Please read the 1st paragraph of section 3.5 on p.128 for the idea.
+         |stack_no == 0 -->      <-- stack_no == 1|
+
+/* Global declarations */
+element  memory[MEMORY_SIZE];
+int      top[2] = { -1, MEMORY_SIZE };
+
+void push ( int stack_no, element item )
+{   check if the stack_no is legal;
+    if ((top[1] - top[0]) <= 2)
+      stacks are full -- print an error message;
+    else
+      push the item onto the specified stack;
+}
+
+element pop ( int stack_no )
+{   check if the stack_no is legal;
+    boundary = (stack_no)? MEMORY_SIZE: -1;
+    if ( top[stack_no] == boundary )
+      empty -- set the error key to an element temp;
+    else
+      temp = pop the top element of the specified stack;
+    return temp;
+}
+----------------------------------------------------------
+p.146 #2  Search "ptr" for "num".
+
+list_pointer search(list_pointer ptr, int num)
+{
+	for (; ptr && ptr->data!=num; ptr = ptr->next)
+		;
+	return ptr;
+}
+
+Note: "ptr" must NOT be passed as a pointer to list_pointer.
+-----------------------------------------------------------
+p.146 #6  Merge 2 nondecreasing lists.
+
+Note:
+1. You are asked to write an "algorithm", not a program.
+2. Algorithm != connecting code lines by natural language.
+3. Read the problem carefully: No additional nodes may be used.
+
+Version 1:
+while (x && y)
+{  find the smaller node between x and y;
+   CUT that node from its original list and ATTACH it to z;
+}
+attach whatever left in x or y to z;
+return z.
+
+Version 2: if the lengths of both lists are known
+let z point to the longer list;
+for (each node in the other list)
+{   find its proper position in z;
+    if (it >= the last node of z)
+       attach the rest of this list to z, and break;
+    else
+       cut it from its original list and INSERT it into z;
+}
+return z.
+
+Worst case Tp=O(m+n).
+-------------------------------------------------------------
+p.150 #2  Boolean parentheses_check()
+
+Algorithm:
+While (getting tokens)
+{ if (token == lparen)  push onto stack;
+  if (token == rparen)
+  {   pop from stack;
+      if (stack is empty)  return FALSE;
+  }
+}
+if (stack is NOT empty)  return FALSE;
+else  return TRUE.
+
+Note:
+0. Should use a linked list to represent a stack.
+1. The stack is for parentheses only.
+2. You may not simply count the numbers of left or right parentheses
+   and then compare the counters.  
+   For example: ")("  has left_counter == right_counter but they are
+   not properly nested.
+   However, it is okay to set counter++ for '(' and counter-- for ')',
+   but must check if counter < 0.
+3. "Push" and "Pop" should be separated from the main function.
+4. Better not check stack[top]=='('.
